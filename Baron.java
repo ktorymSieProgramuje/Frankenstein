@@ -1,9 +1,19 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Baron implements Card {
     private int cardValue = 3;
     private String cardName = "baron";
-
+    private ArrayList<ClientHandler> clientThread;
+    private BufferedReader in;
+    private PrintWriter out;
+    private Socket client;
+    
 
     @Override
     public int getCardValue() {
@@ -17,38 +27,38 @@ public class Baron implements Card {
     }
 
     @Override
-    public int specialFunction(Player currentPlayer, Player targetPlayer1, Player targetPlayer2, Player targetPlayer3, int length, Card[] deck) {
+    public int specialFunction(Player currentPlayer, Player targetPlayer1, Player targetPlayer2, Player targetPlayer3, int length, Card[] deck, BufferedReader in, PrintWriter out, Socket client, ArrayList<ClientHandler> clientThread) throws IOException {
 
-
-        Scanner sc = new Scanner(System.in);
+        in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+        out = new PrintWriter(client.getOutputStream(), true);
 
 
         while(true)
         {
-            System.out.println("Current player: " + currentPlayer.getPlayerName());
-            System.out.println("Choose player: ");
+            serverMessageToAll("Current player: " + currentPlayer.getPlayerName());
+            serverMessageToAll("Choose: ");
             if(targetPlayer1.getIsPlaying() && !targetPlayer1.isPlayedHandmaid()){
-                System.out.println(targetPlayer1.getPlayerName());
+                serverMessageToAll(targetPlayer1.getPlayerName());
             }
             if(targetPlayer2.getIsPlaying() && !targetPlayer2.isPlayedHandmaid()){
-                System.out.println(targetPlayer2.getPlayerName());
+                serverMessageToAll(targetPlayer2.getPlayerName());
             }
             if(targetPlayer3.getIsPlaying() && !targetPlayer3.isPlayedHandmaid()){
-                System.out.println(targetPlayer3.getPlayerName());
+                serverMessageToAll(targetPlayer3.getPlayerName());
             }
             if((!targetPlayer1.getIsPlaying() || targetPlayer1.isPlayedHandmaid()) && (!targetPlayer2.getIsPlaying() || targetPlayer2.isPlayedHandmaid()) && (!targetPlayer3.getIsPlaying() || targetPlayer3.isPlayedHandmaid())){
-                System.out.println("ERROR");
+                serverMessageToAll("ERROR");
                 break;
             }
 
-            System.out.println("Choose a player");
-            String playerChoice = sc.nextLine();
+            serverMessageToAll("Choose player");
+            String playerChoice = in.readLine();
             playerChoice = playerChoice.toLowerCase();
 
 
             if(playerChoice.equals(currentPlayer.getPlayerName()))
             {
-                System.out.println("ERROR");
+                serverMessageToAll("ERROR");
             }
 
             else if(playerChoice.equals(targetPlayer1.getPlayerName()))
@@ -56,11 +66,11 @@ public class Baron implements Card {
 
                 if(!targetPlayer1.getIsPlaying())
                 {
-                    System.out.println("ERROR");
+                    serverMessageToAll("ERROR");
 
                 }
                 else if(targetPlayer1.isPlayedHandmaid()){
-                    System.out.println("ERROR");
+                    serverMessageToAll("ERROR");
                 }
                 else
                 {
@@ -69,16 +79,16 @@ public class Baron implements Card {
                         if(currentPlayer.getCard1().getCardValue() > targetPlayer1.getCard1().getCardValue())
                         {
                             targetPlayer1.setPlaying(false);
-                            System.out.println("ELIMINATED " + targetPlayer1.getPlayerName());
+                            serverMessageToAll("ELIMINATED " + targetPlayer1.getPlayerName());
                         }
                         else if(currentPlayer.getCard1().getCardValue() < targetPlayer1.getCard1().getCardValue())
                         {
                             currentPlayer.setPlaying(false);
-                            System.out.println("ELIMINATED " + currentPlayer.getPlayerName());
+                            serverMessageToAll("ELIMINATED " + currentPlayer.getPlayerName());
                         }
                         else
                         {
-                            System.out.println(" ");
+                            serverMessageToAll(" ");
                         }
                     }
                     else if(!currentPlayer.getCard2().getCardName().equals("baron"))
@@ -86,17 +96,17 @@ public class Baron implements Card {
                         if(currentPlayer.getCard2().getCardValue() > targetPlayer1.getCard1().getCardValue())
                         {
                             targetPlayer1.setPlaying(false);
-                            System.out.println("ELIMINATED " + targetPlayer1.getPlayerName());
+                            serverMessageToAll("ELIMINATED " + targetPlayer1.getPlayerName());
                         }
                         else if(currentPlayer.getCard1().getCardValue() < targetPlayer1.getCard1().getCardValue())
                         {
                             currentPlayer.setPlaying(false);
-                            System.out.println("ELIMINATED " + currentPlayer.getPlayerName());
+                            serverMessageToAll("ELIMINATED " + currentPlayer.getPlayerName());
 
                         }
                         else
                         {
-                            System.out.println(" ");
+                            serverMessageToAll(" ");
                         }
                     }
                     break;
@@ -107,11 +117,11 @@ public class Baron implements Card {
 
                 if(!targetPlayer2.getIsPlaying())
                 {
-                    System.out.println("ERROR");
+                    serverMessageToAll("ERROR");
 
                 }
                 else if(targetPlayer2.isPlayedHandmaid()){
-                    System.out.println("ERROE");
+                    serverMessageToAll("ERROE");
                 }
                 else
                 {
@@ -120,16 +130,16 @@ public class Baron implements Card {
                         if(currentPlayer.getCard1().getCardValue() > targetPlayer2.getCard1().getCardValue())
                         {
                             targetPlayer2.setPlaying(false);
-                            System.out.println("ELIMINATED " + targetPlayer2.getPlayerName());
+                            serverMessageToAll("ELIMINATED " + targetPlayer2.getPlayerName());
                         }
                         else if(currentPlayer.getCard1().getCardValue() < targetPlayer2.getCard1().getCardValue())
                         {
                             currentPlayer.setPlaying(false);
-                            System.out.println("ELIMINATED "+ currentPlayer.getPlayerName());
+                            serverMessageToAll("ELIMINATED "+ currentPlayer.getPlayerName());
                         }
                         else
                         {
-                            System.out.println(" ");
+                            serverMessageToAll(" ");
                         }
                     }
                     else if(!currentPlayer.getCard2().getCardName().equals("baron"))
@@ -137,17 +147,17 @@ public class Baron implements Card {
                         if(currentPlayer.getCard2().getCardValue() > targetPlayer2.getCard1().getCardValue())
                         {
                             targetPlayer2.setPlaying(false);
-                            System.out.println("ELIMINATED " + targetPlayer2.getPlayerName());
+                            serverMessageToAll("ELIMINATED " + targetPlayer2.getPlayerName());
                         }
                         else if(currentPlayer.getCard1().getCardValue() < targetPlayer2.getCard1().getCardValue())
                         {
                             currentPlayer.setPlaying(false);
-                            System.out.println("ELIMINATED " + currentPlayer.getPlayerName());
+                            serverMessageToAll("ELIMINATED " + currentPlayer.getPlayerName());
 
                         }
                         else
                         {
-                            System.out.println(" ");
+                            serverMessageToAll(" ");
                         }
 
                     }
@@ -161,11 +171,11 @@ public class Baron implements Card {
 
                 if(!targetPlayer3.getIsPlaying())
                 {
-                    System.out.println("ERROR");
+                    serverMessageToAll("ERROR");
 
                 }
                 else if(targetPlayer3.isPlayedHandmaid()){
-                    System.out.println("ERROR");
+                    serverMessageToAll("ERROR");
                 }
                 else
                 {
@@ -174,16 +184,16 @@ public class Baron implements Card {
                         if(currentPlayer.getCard1().getCardValue() > targetPlayer3.getCard1().getCardValue())
                         {
                             targetPlayer3.setPlaying(false);
-                            System.out.println("ELIMINATED " + targetPlayer3.getPlayerName());
+                            serverMessageToAll("ELIMINATED " + targetPlayer3.getPlayerName());
                         }
                         else if(currentPlayer.getCard1().getCardValue() < targetPlayer3.getCard1().getCardValue())
                         {
                             currentPlayer.setPlaying(false);
-                            System.out.println("ELIMINATED " + currentPlayer.getPlayerName());
+                            serverMessageToAll("ELIMINATED " + currentPlayer.getPlayerName());
                         }
                         else
                         {
-                            System.out.println(" ");
+                            serverMessageToAll(" ");
                         }
                     }
                     else if(!currentPlayer.getCard2().getCardName().equals("baron"))
@@ -191,16 +201,16 @@ public class Baron implements Card {
                         if(currentPlayer.getCard2().getCardValue() > targetPlayer3.getCard1().getCardValue())
                         {
                             targetPlayer3.setPlaying(false);
-                            System.out.println("ELIMINATED " + targetPlayer3.getPlayerName());
+                            serverMessageToAll("ELIMINATED " + targetPlayer3.getPlayerName());
                         }
                         else if(currentPlayer.getCard1().getCardValue() < targetPlayer3.getCard1().getCardValue())
                         {
                             currentPlayer.setPlaying(false);
-                            System.out.println("ELIMINATED " + currentPlayer.getPlayerName());
+                            serverMessageToAll("ELIMINATED " + currentPlayer.getPlayerName());
                         }
                         else
                         {
-                            System.out.println(" ");
+                            serverMessageToAll(" ");
                         }
 
                     }
@@ -211,7 +221,7 @@ public class Baron implements Card {
 
             else if(!playerChoice.equals(targetPlayer1.getPlayerName()) || !playerChoice.equals(targetPlayer2.getPlayerName()) || !playerChoice.equals(targetPlayer3.getPlayerName()) || !playerChoice.equals(currentPlayer.getPlayerName()))
             {
-                System.out.println("ERROR");
+                serverMessageToAll("ERROR");
             }
 
 
@@ -219,5 +229,11 @@ public class Baron implements Card {
 
         return length;
 
+    }
+
+    private void serverMessageToAll(String msg) {
+        for (ClientHandler aClient : clientThread) {
+            aClient.out.println("S:" + msg);
+        }
     }
 }

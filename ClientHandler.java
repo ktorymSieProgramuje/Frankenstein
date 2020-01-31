@@ -12,7 +12,7 @@ public class ClientHandler implements Runnable {
 
     private Socket client;
     private BufferedReader in;
-    private PrintWriter out;
+    public PrintWriter out;
     private ArrayList<ClientHandler> clients;
     private String login;
     private ArrayList<String> logins;
@@ -43,6 +43,12 @@ public class ClientHandler implements Runnable {
 
 
         out.println("S:CONNECT");
+
+        Player player1 = players.get(0);
+        Player player2 = players.get(1);
+        Player player3 = players.get(2);
+        Player player4 = players.get(3);
+        Player player5 = players.get(4);
 
         try {
 
@@ -83,6 +89,7 @@ public class ClientHandler implements Runnable {
             }
 
 
+
             //serverMessageToAll("START " + usersId.equals(1));
 
             for (Player player : players) {
@@ -97,12 +104,6 @@ public class ClientHandler implements Runnable {
                 serverMessage("player" + b + " " + player.getPlayerName());
                 b++;
             }
-
-            Player player1 = new Player("x");
-            Player player2 = new Player("x");
-            Player player3 = new Player("x");
-            Player player4 = new Player("x");
-            Player player5 = new Player("x");
 
             Deck mainDeck = new Deck();
             mainDeck.populateDeck();
@@ -135,8 +136,8 @@ public class ClientHandler implements Runnable {
                         if (playerOrder[turnOrder].getIsPlaying()) {{
                             playerOrder[turnOrder].setPlayedHandmaid(false);
                             deckLength = dealCard2(playerOrder[turnOrder], deckLength, deck1);
-                            out.println("START " + playerOrder[turnOrder].getPlayerName());
-                            out.println(playerOrder[turnOrder].getPlayerName() + " YOUR MOVE " + playerOrder[turnOrder].getCard1().getCardName() + " OR " + playerOrder[turnOrder].getCard2().getCardName());
+                            serverMessage("START " + playerOrder[turnOrder].getPlayerName());
+                            serverMessage(playerOrder[turnOrder].getPlayerName() + " YOUR MOVE " + playerOrder[turnOrder].getCard1().getCardName() + " OR " + playerOrder[turnOrder].getCard2().getCardName());
 
                             int choice = 0;
 
@@ -145,7 +146,7 @@ public class ClientHandler implements Runnable {
                                 if (playerOrder[turnOrder].getCard1().getCardName().equals("countess")) {
                                     if (playerOrder[turnOrder].getCard2().getCardName().equals("prince") || playerOrder[0].getCard2().getCardName().equals("king")) {
                                         if (choice == 2) {
-                                            out.println("ERROR");
+                                            serverMessage("ERROR");
                                         } else {
                                             break;
                                         }
@@ -155,7 +156,7 @@ public class ClientHandler implements Runnable {
                                 } else if (playerOrder[turnOrder].getCard2().getCardName().equals("countess")) {
                                     if (playerOrder[turnOrder].getCard1().getCardName().equals("prince") || playerOrder[turnOrder].getCard1().getCardName().equals("king")) {
                                         if (choice == 1) {
-                                            out.println("ERROR");
+                                            serverMessage("ERROR");
                                         } else {
                                             break;
                                         }
@@ -168,10 +169,10 @@ public class ClientHandler implements Runnable {
                             }
 
                             if (choice == 1) {
-                                deckLength = playerOrder[turnOrder].getCard1().specialFunction(playerOrder[turnOrder], playerOrder[turnOrder2], playerOrder[turnOrder3], playerOrder[turnOrder4], deckLength, deck1);
+                                deckLength = playerOrder[turnOrder].getCard1().specialFunction(playerOrder[turnOrder], playerOrder[turnOrder2], playerOrder[turnOrder3], playerOrder[turnOrder4], deckLength, deck1,in ,out, client, clients);
                                 playerOrder[turnOrder].setCard1(playerOrder[turnOrder].getCard2());
                             } else {
-                                deckLength = playerOrder[turnOrder].getCard2().specialFunction(playerOrder[turnOrder], playerOrder[turnOrder2], playerOrder[turnOrder3], playerOrder[turnOrder4], deckLength, deck1);
+                                deckLength = playerOrder[turnOrder].getCard2().specialFunction(playerOrder[turnOrder], playerOrder[turnOrder2], playerOrder[turnOrder3], playerOrder[turnOrder4], deckLength, deck1,in ,out, client, clients);
                             }
 
                             int isOutCount = 0;
@@ -197,23 +198,23 @@ public class ClientHandler implements Runnable {
 
                                 if (player1.getIsPlaying()) {
                                     player1.setScore(player1.getPlayerScore() + 1);
-                                    out.println("ROUND WINNER " + player1.getPlayerName());
+                                    serverMessage("ROUND WINNER " + player1.getPlayerName());
                                     break;
                                 } else if (player2.getIsPlaying()) {
                                     player2.setScore(player2.getPlayerScore() + 1);
-                                    out.println("ROUND WINNER " + player2.getPlayerName());
+                                    serverMessage("ROUND WINNER " + player2.getPlayerName());
                                     break;
                                 } else if (player3.getIsPlaying()) {
                                     player3.setScore(player3.getPlayerScore() + 1);
-                                    out.println("ROUND WINNER " + player3.getPlayerName());
+                                    serverMessage("ROUND WINNER " + player3.getPlayerName());
                                     break;
                                 } else if (player3.getIsPlaying()) {
                                     player4.setScore(player4.getPlayerScore() + 1);
-                                    out.println("ROUND WINNER " + player4.getPlayerName());
+                                    serverMessage("ROUND WINNER " + player4.getPlayerName());
                                     break;
                                 } else {
                                     player4.setScore(player5.getPlayerScore() + 1);
-                                    out.println("ROUND WINNER " + player5.getPlayerName());
+                                    serverMessage("ROUND WINNER " + player5.getPlayerName());
                                     break;
                                 }
                             }
@@ -244,48 +245,31 @@ public class ClientHandler implements Runnable {
 
                                 if (cardVal1 > cardVal2 && cardVal1 > cardVal3 && cardVal1 > cardVal4 && cardVal1 > cardVal5) {
                                     player1.setScore(player1.getPlayerScore() + 1);
-                                    out.println("ROUND WINNER " + player1.getPlayerName());
-                                    out.println("ROUND RESULTS " + player1.getPlayerName() + player1.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player2.getPlayerName() + player2.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player3.getPlayerName() + player3.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player4.getPlayerName() + player4.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player5.getPlayerName() + player5.getPlayerScore());
-                                    break;
+                                    serverMessage("ROUND WINNER " + player1.getPlayerName());
                                 } else if (cardVal2 > cardVal1 && cardVal2 > cardVal3 && cardVal2 > cardVal4 && cardVal2 > cardVal5) {
                                     player2.setScore(player2.getPlayerScore() + 1);
-                                    out.println("ROUND WINNER " + player2.getPlayerName());
-                                    out.println("ROUND RESULTS " + player1.getPlayerName() + player1.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player2.getPlayerName() + player2.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player3.getPlayerName() + player3.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player4.getPlayerName() + player4.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player5.getPlayerName() + player5.getPlayerScore());
-                                    break;
+                                    serverMessage("ROUND WINNER " + player2.getPlayerName());
                                 } else if (cardVal3 > cardVal1 && cardVal3 > cardVal2 && cardVal3 > cardVal4 && cardVal3 > cardVal5) {
                                     player3.setScore(player3.getPlayerScore() + 1);
-                                    out.println("ROUND WINNER " + player3.getPlayerName());
-                                    out.println("ROUND RESULTS " + player1.getPlayerName() + player1.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player2.getPlayerName() + player2.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player3.getPlayerName() + player3.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player4.getPlayerName() + player4.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player5.getPlayerName() + player5.getPlayerScore());
-                                    break;
+                                    serverMessage("ROUND WINNER " + player3.getPlayerName());
                                 } else if (cardVal4 > cardVal1 && cardVal4 > cardVal2 && cardVal4 > cardVal3 && cardVal4 > cardVal5) {
                                     player4.setScore(player4.getPlayerScore() + 1);
-                                    out.println("ROUND WINNER " + player4.getPlayerName());
-                                    out.println("ROUND RESULTS " + player1.getPlayerName() + player1.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player2.getPlayerName() + player2.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player3.getPlayerName() + player3.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player4.getPlayerName() + player4.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player5.getPlayerName() + player5.getPlayerScore());
-                                    break;
+                                    serverMessage("ROUND WINNER " + player4.getPlayerName());
                                 } else {
-                                    out.println("ROUND RESULTS " + player1.getPlayerName() + player1.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player2.getPlayerName() + player2.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player3.getPlayerName() + player3.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player4.getPlayerName() + player4.getPlayerScore());
-                                    out.println("ROUND RESULTS " + player5.getPlayerName() + player5.getPlayerScore());
+                                    serverMessage("ROUND RESULTS " + player1.getPlayerName() + player1.getPlayerScore());
+                                    serverMessage("ROUND RESULTS " + player2.getPlayerName() + player2.getPlayerScore());
+                                    serverMessage("ROUND RESULTS " + player3.getPlayerName() + player3.getPlayerScore());
+                                    serverMessage("ROUND RESULTS " + player4.getPlayerName() + player4.getPlayerScore());
+                                    serverMessage("ROUND RESULTS " + player5.getPlayerName() + player5.getPlayerScore());
                                     break;
                                 }
+
+                                serverMessage("ROUND RESULTS " + player1.getPlayerName() + player1.getPlayerScore());
+                                serverMessage("ROUND RESULTS " + player2.getPlayerName() + player2.getPlayerScore());
+                                serverMessage("ROUND RESULTS " + player3.getPlayerName() + player3.getPlayerScore());
+                                serverMessage("ROUND RESULTS " + player4.getPlayerName() + player4.getPlayerScore());
+                                serverMessage("ROUND RESULTS " + player5.getPlayerName() + player5.getPlayerScore());
+                                break;
                             }
                         }
 
@@ -351,11 +335,11 @@ public class ClientHandler implements Runnable {
 
                         }
                     }
-                    out.println("ROUND RESULTS " + player1.getPlayerName() + player1.getPlayerScore());
-                    out.println("ROUND RESULTS " + player2.getPlayerName() + player2.getPlayerScore());
-                    out.println("ROUND RESULTS " + player3.getPlayerName() + player3.getPlayerScore());
-                    out.println("ROUND RESULTS " + player4.getPlayerName() + player4.getPlayerScore());
-                    out.println("ROUND RESULTS " + player5.getPlayerName() + player5.getPlayerScore());
+                    serverMessage("ROUND RESULTS " + player1.getPlayerName() + player1.getPlayerScore());
+                    serverMessage("ROUND RESULTS " + player2.getPlayerName() + player2.getPlayerScore());
+                    serverMessage("ROUND RESULTS " + player3.getPlayerName() + player3.getPlayerScore());
+                    serverMessage("ROUND RESULTS " + player4.getPlayerName() + player4.getPlayerScore());
+                    serverMessage("ROUND RESULTS " + player5.getPlayerName() + player5.getPlayerScore());
 
                     player1.setPlayedHandmaid(false);
                     player1.setPlaying(true);
@@ -369,19 +353,19 @@ public class ClientHandler implements Runnable {
                     player5.setPlaying(true);
 
                     if (player1.getPlayerScore() == 4) {
-                        out.println("GAME WINNER " + player1.getPlayerName());
+                        serverMessage("GAME WINNER " + player1.getPlayerName());
                         break;
                     } else if (player2.getPlayerScore() == 4) {
-                        out.println("GAME WINNER " + player2.getPlayerName());
+                        serverMessage("GAME WINNER " + player2.getPlayerName());
                         break;
                     } else if (player3.getPlayerScore() == 4) {
-                        out.println("GAME WINNER " + player3.getPlayerName());
+                        serverMessage("GAME WINNER " + player3.getPlayerName());
                         break;
                     } else if (player4.getPlayerScore() == 4) {
-                        out.println("GAME WINNER " + player4.getPlayerName());
+                        serverMessage("GAME WINNER " + player4.getPlayerName());
                         break;
                     } else if (player5.getPlayerScore() == 4) {
-                        out.println("GAME WINNER " + player5.getPlayerName());
+                        serverMessage("GAME WINNER " + player5.getPlayerName());
                         break;
                     }
                 }

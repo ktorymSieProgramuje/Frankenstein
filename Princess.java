@@ -1,6 +1,17 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.ArrayList;
+
 public class Princess implements Card {
     private int cardValue = 8;
     private String cardName = "princess";
+    private ArrayList<ClientHandler> clientThread;
+    private BufferedReader in;
+    private PrintWriter out;
+    private Socket client;
 
 
     @Override
@@ -14,10 +25,20 @@ public class Princess implements Card {
     }
 
     @Override
-    public int specialFunction(Player currentPlayer, Player targetPlayer1, Player targetPlayer2, Player targetPlayer3, int length, Card[] deck) {
+    public int specialFunction(Player currentPlayer, Player targetPlayer1, Player targetPlayer2, Player targetPlayer3, int length, Card[] deck, BufferedReader in, PrintWriter out, Socket client, ArrayList<ClientHandler> clientThread) throws IOException {
 
-        System.out.println("You have discarded a Princess \nYou are out of the round!");
+        in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+        out = new PrintWriter(client.getOutputStream(), true);
+
+        serverMessageToAll("MOVE Princess");
         currentPlayer.setPlaying(false);
         return length;
+    }
+
+
+    private void serverMessageToAll(String msg) {
+        for (ClientHandler aClient : clientThread) {
+            aClient.out.println("S:" + msg);
+        }
     }
 }

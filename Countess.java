@@ -1,6 +1,18 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.ArrayList;
+
 public class Countess implements Card {
     private int cardValue = 7;
     private String cardName = "countess";
+    private ArrayList<ClientHandler> clientThread;
+    private BufferedReader in;
+    private PrintWriter out;
+    private Socket client;
+
 
     @Override
     public int getCardValue() {
@@ -14,9 +26,20 @@ public class Countess implements Card {
     }
 
     @Override
-    public int specialFunction(Player currentPlayer, Player targetPlayer1, Player targetPlayer2, Player targetPlayer3, int length, Card[] deck) {
+    public int specialFunction(Player currentPlayer, Player targetPlayer1, Player targetPlayer2, Player targetPlayer3, int length, Card[] deck, BufferedReader in, PrintWriter out, Socket client, ArrayList<ClientHandler> clientThread) throws IOException {
 
-        System.out.println(currentPlayer.getPlayerName() + " has discarded a Countess");
+
+        in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+        out = new PrintWriter(client.getOutputStream(), true);
+
+        serverMessageToAll("MOVE Countess");
         return length;
+    }
+
+
+    private void serverMessageToAll(String msg) {
+        for (ClientHandler aClient : clientThread) {
+            aClient.out.println("S:" + msg);
+        }
     }
 }

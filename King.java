@@ -1,9 +1,18 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class King implements Card {
     private int cardValue = 6;
     private String cardName = "king";
-    Scanner sc = new Scanner(System.in);
+    private ArrayList<ClientHandler> clientThread;
+    private BufferedReader in;
+    private PrintWriter out;
+    private Socket client;
 
 
     @Override
@@ -17,39 +26,41 @@ public class King implements Card {
     }
 
     @Override
-    public int specialFunction(Player currentPlayer, Player targetPlayer1, Player targetPlayer2, Player targetPlayer3, int length, Card[] deck) {
+    public int specialFunction(Player currentPlayer, Player targetPlayer1, Player targetPlayer2, Player targetPlayer3, int length, Card[] deck, BufferedReader in, PrintWriter out, Socket client, ArrayList<ClientHandler> clientThread) throws IOException {
+        in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+        out = new PrintWriter(client.getOutputStream(), true);
 
         while (true) {
-            System.out.println("Current player: " + currentPlayer.getPlayerName());
-            System.out.println("You can target:");
+            serverMessageToAll("Current player: " + currentPlayer.getPlayerName());
+            serverMessageToAll("You can target:");
             if(targetPlayer1.getIsPlaying() && !targetPlayer1.isPlayedHandmaid()){
-                System.out.println(targetPlayer1.getPlayerName());
+                serverMessageToAll(targetPlayer1.getPlayerName());
             }
             if(targetPlayer2.getIsPlaying() && !targetPlayer2.isPlayedHandmaid()){
-                System.out.println(targetPlayer2.getPlayerName());
+                serverMessageToAll(targetPlayer2.getPlayerName());
             }
             if(targetPlayer3.getIsPlaying() && !targetPlayer3.isPlayedHandmaid()){
-                System.out.println(targetPlayer3.getPlayerName());
+                serverMessageToAll(targetPlayer3.getPlayerName());
             }
             if((!targetPlayer1.getIsPlaying() || targetPlayer1.isPlayedHandmaid()) && (!targetPlayer2.getIsPlaying() || targetPlayer2.isPlayedHandmaid()) && (!targetPlayer3.getIsPlaying() || targetPlayer3.isPlayedHandmaid())){
-                System.out.println("ERROR");
+                serverMessageToAll("ERROR");
                 break;
             }
 
-            System.out.println("Choose a player");
-            String playerChoice = sc.nextLine();
+            serverMessageToAll("Choose a player");
+            String playerChoice = in.readLine();
             playerChoice = playerChoice.toLowerCase();
 
             if (playerChoice.equals(currentPlayer.getPlayerName())) {
-                System.out.println("ERROR");
+                serverMessageToAll("ERROR");
             }
 
             else if (playerChoice.equals(targetPlayer1.getPlayerName())) {
                 if (!targetPlayer1.getIsPlaying()) {
-                    System.out.println("ERROR");
+                    serverMessageToAll("ERROR");
                 }
                 else if(targetPlayer1.isPlayedHandmaid()){
-                    System.out.println("ERROR");
+                    serverMessageToAll("ERROR");
                 }
                 else {
                     if(currentPlayer.getCard1().getCardName().equals("king")){
@@ -62,16 +73,16 @@ public class King implements Card {
                         targetPlayer1.setCard1(currentPlayer.getCard1());
                         currentPlayer.setCard1(temp);
                     }
-                    System.out.println("You have traded hands with " + targetPlayer1.getPlayerName());
+                    serverMessageToAll("MOVE King");
                 }
             }
 
             else if (playerChoice.equals(targetPlayer2.getPlayerName())) {
                 if (!targetPlayer2.getIsPlaying()) {
-                    System.out.println("ERROR");
+                    serverMessageToAll("ERROR");
                 }
                 else if(targetPlayer2.isPlayedHandmaid()){
-                    System.out.println("ERROR");
+                    serverMessageToAll("ERROR");
                 }
                 else {
                     if(currentPlayer.getCard1().getCardName().equals("king")){
@@ -84,16 +95,16 @@ public class King implements Card {
                         targetPlayer2.setCard1(currentPlayer.getCard1());
                         currentPlayer.setCard1(temp);
                     }
-                    System.out.println("You have traded hands with " + targetPlayer2.getPlayerName());
+                    serverMessageToAll("MOVE King");
                 }
             }
 
             else if (playerChoice.equals(targetPlayer3.getPlayerName())) {
                 if (!targetPlayer3.getIsPlaying()) {
-                    System.out.println("ERROR");
+                    serverMessageToAll("ERROR");
                 }
                 else if(targetPlayer3.isPlayedHandmaid()){
-                    System.out.println("ERROR");
+                    serverMessageToAll("ERROR");
                 }
                 else {
                     if(currentPlayer.getCard1().getCardName().equals("king")){
@@ -106,11 +117,18 @@ public class King implements Card {
                         targetPlayer3.setCard1(currentPlayer.getCard1());
                         currentPlayer.setCard1(temp);
                     }
-                    System.out.println("You have traded hands with " + targetPlayer3.getPlayerName());
+                    serverMessageToAll("MOVE King");
                 }
             }
             break;
         }
         return length;
+    }
+
+
+    private void serverMessageToAll(String msg) {
+        for (ClientHandler aClient : clientThread) {
+            aClient.out.println("S:" + msg);
+        }
     }
 }
